@@ -1,4 +1,4 @@
-### Advin token: Authorization: Basic YWRtaW46YWRtaW4=
+### Advin token: Authorization: Basic YWRtaW46YWRtaW4=  v1
 POST http://localhost:4111/api/v1/auth/login
 Content-Type: application/json
 
