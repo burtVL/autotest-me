@@ -1,4 +1,4 @@
-### Admin token: Authorization: Basic YWRtaW46YWRtaW4=  v1
+### Admin token: Authorization: Basic YWRtaW46YWRtaW4=  v3
 POST http://localhost:4111/api/v1/auth/login
 Content-Type: application/json
 
@@ -7,7 +7,7 @@ Content-Type: application/json
   "password": "admin"
 }
 
-### Positive test: Admin can create new user with correct data
+### Positive test: Admin can create new user 1 with correct data
 POST http://localhost:4111/api/v1/admin/users
 Content-Type: application/json
 Authorization: Basic YWRtaW46YWRtaW4=
@@ -18,7 +18,29 @@ Authorization: Basic YWRtaW46YWRtaW4=
   "role": "USER"
 }
 
-### Positive test: User can authorizied with correct data
+### Positive test: Admin can create new user 2 with correct data
+POST http://localhost:4111/api/v1/admin/users
+Content-Type: application/json
+Authorization: Basic YWRtaW46YWRtaW4=
+
+{
+  "username": "Anton_1922",
+  "password": "$some5Pass$",
+  "role": "USER"
+}
+
+### NEGATIVE test: User can not create new user with correct data
+POST http://localhost:4111/api/v1/admin/users
+Content-Type: application/json
+Authorization: Basic QW5uZV8xOTgyOiRzb21lNFBhc3Mk
+
+{
+  "username": "Anne_1984",
+  "password": "$some4PasS$",
+  "role": "USER"
+}
+
+### Positive test: User 1 can authorizied with correct data
 ### Authorization: Basic QW5uZV8xOTgyOiRzb21lNFBhc3Mk
 POST http://localhost:4111/api/v1/auth/login
 Content-Type: application/json
@@ -28,18 +50,110 @@ Content-Type: application/json
   "password": "$some4Pass$"
 }
 
-### Positive test: Authorized user can create account
+### Positive test: User 2 can authorizied with correct data
+### Authorization: Basic QW50b25fMTkyMjokc29tZTVQYXNzJA==
+POST http://localhost:4111/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "Anton_1922",
+  "password": "$some5Pass$"
+}
+
+
+### Negative test: User can not authorizied with incorrect data
+### Authorization: Basic QW5uZV8xOTgyOiRzb21lNFBhc3Mk
+POST http://localhost:4111/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "Anne_1983",
+  "password": "$some4Pass$"
+}
+
+### Negative test: User can not authorizied with blank username
+### Authorization: Basic QW5uZV8xOTgyOiRzb21lNFBhc3Mk
+POST http://localhost:4111/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "",
+  "password": "$some4Pass$"
+}
+
+### Negative test: User can not authorizied with blank password
+### Authorization: Basic QW5uZV8xOTgyOiRzb21lNFBhc3Mk
+POST http://localhost:4111/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "Anne_1982",
+  "password": ""
+}
+
+### Negative test: User can not authorizied without Authorization
+
+POST http://localhost:4111/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "Anne_1982",
+  "password": "$some4Pass$"
+}
+
+### Positive test: Authorized user 1 can create account
 POST http://localhost:4111/api/v1/accounts
 Content-Type: application/json
 Authorization: Basic QW5uZV8xOTgyOiRzb21lNFBhc3Mk
 
-### Positive test: Authorized user can deposit money in account
+### Positive test: Authorized user 2 can create account
+POST http://localhost:4111/api/v1/accounts
+Content-Type: application/json
+Authorization: Basic QW50b25fMTkyMjokc29tZTVQYXNzJA==
+
+### Negative test: User can not create account without Authorization
+POST http://localhost:4111/api/v1/accounts
+Content-Type: application/json
+Authorization:
+
+### Positive test: Authorized user 1 can deposit money in account
 POST http://localhost:4111/api/v1/accounts/deposit
 Content-Type: application/json
 Authorization: Basic QW5uZV8xOTgyOiRzb21lNFBhc3Mk
 
 {
-  "id": 3,
+  "id": 1,
+  "balance": 1000
+}
+
+### Positive test: Authorized user 2 can deposit money in account
+POST http://localhost:4111/api/v1/accounts/deposit
+Content-Type: application/json
+Authorization: Basic QW50b25fMTkyMjokc29tZTVQYXNzJA==
+
+{
+  "id": 2,
+  "balance": 1000
+}
+
+
+### Negative test: User 2 cannot deposit money in account User 1
+POST http://localhost:4111/api/v1/accounts/deposit
+Content-Type: application/json
+Authorization: Basic QW50b25fMTkyMjokc29tZTVQYXNzJA==
+
+{
+  "id": 1,
+  "balance": 1000
+}
+
+### Negative test: User 2 cannot deposit money without Authorization
+POST http://localhost:4111/api/v1/accounts/deposit
+Content-Type: application/json
+
+
+{
+  "id": 2,
   "balance": 1000
 }
 
@@ -92,6 +206,17 @@ Authorization: Basic QW5uZV8xOTgyOiRzb21lNFBhc3Mk
 {
   "senderAccountId": 3,
   "receiverAccountId": 4,
+  "amount": 500
+}
+
+### Negative test: Authorized user 1 cannot transfer money from account User 2: 2 to account: 1
+POST http://localhost:4111/api/v1/accounts/transfer
+Content-Type: application/json
+Authorization: Basic QW5uZV8xOTgyOiRzb21lNFBhc3Mk
+
+{
+  "senderAccountId": 2,
+  "receiverAccountId": 1,
   "amount": 500
 }
 
@@ -204,3 +329,14 @@ Authorization: Basic QW5uZV8xOTgyOiRzb21lNFBhc3Mk
 {
   "name": "кукуукунеенгор"
 }
+
+### Negative test:  User 2 cannot get transactions account User 1
+GET http://localhost:4111/api/v1/accounts/1/transactions
+Content-Type: application/json
+Authorization: Basic QW50b25fMTkyMjokc29tZTVQYXNzJA==
+
+
+### Negative test: User cannot get list of all users
+GET http://localhost:4111/api/v1/admin/users
+Content-Type: application/json
+Authorization: Basic QW5uZV8xOTgyOiRzb21lNFBhc3Mk
